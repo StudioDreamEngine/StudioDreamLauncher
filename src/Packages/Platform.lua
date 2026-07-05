@@ -20,7 +20,7 @@ ffi.cdef[[
 
 -- POSIX standard functions that should work on all OS'es (Android, Linux, MacOS, Windows) assuming microsoft decides to not be different for once
 ffi.cdef([[
-    int execvp(char const* path, const char* argv[]);
+    int execv(char const* path, const char* argv[]);
 ]])
 
 local Platform = {}
@@ -117,18 +117,9 @@ function Platform.OpenFolderDialog(Title)
 end
 
 -- bloctans is stupid he says
-function Platform.ExecuteAndReplace(...)
-    local Args = table.pack(...)
-    local ArgsProcessed = {}
-
-    for i, v in pairs(Args) do
-        if i ~= "n" then
-            table.insert(ArgsProcessed, tostring(v))
-        end
-    end
-
-    local ArgsC = ffi.new("const char*["..(Args.n+1).."]", ArgsProcessed)
-    local a = C.execvp(ArgsC[0], ArgsC)
+function Platform.ExecuteAndReplace(Path)
+    local a = C.execv(Path, nil)
+	print(a)
 end
 
 return Platform
