@@ -84,10 +84,7 @@ function love.update(dt)
     if launch then text = 'Launching...' end
 
     if timer <= 0 and not launch and not needsDownload then
-        --Platform.Execute("chmod +x " .. Platform.GetDocuments() .. '/StudioDream' .. ext)
-        --Platform.ExecuteAndReplace(Platform.GetDocuments() .. '/StudioDream' .. ext)
-        --love.system.openURL(Platform.GetDocuments() .. '/StudioDream' .. ext)
-        os.execute(Platform.GetDocuments() .. '/StudioDream' .. ext)
+        Platform.Execute("chmod +x " .. Platform.GetDocuments() .. '/StudioDream' .. ext)
         love.event.quit()
     end
 
