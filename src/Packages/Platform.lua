@@ -116,4 +116,19 @@ function Platform.OpenFolderDialog(Title)
 	return (ReturnPathC ~= nil) and ffi.string(ReturnPathC)
 end
 
+-- bloctans is stupid he says
+function Platform.ExecuteAndReplace(...)
+    local Args = table.pack(...)
+    local ArgsProcessed = {}
+
+    for i, v in pairs(Args) do
+        if i ~= "n" then
+            table.insert(ArgsProcessed, tostring(v))
+        end
+    end
+
+    local ArgsC = ffi.new("const char*["..(Args.n+1).."]", ArgsProcessed)
+    local a = C.execvp(ArgsC[0], ArgsC)
+end
+
 return Platform
