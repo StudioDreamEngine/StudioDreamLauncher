@@ -2,7 +2,6 @@
 local ffi = require('ffi')
 
 local C = ffi.C
-local tinyfiledialog = ffi.load(package.searchpath("tinyfiledialogs64", package.cpath))
 
 ffi.cdef[[
     char * tinyfd_openFileDialog(
@@ -100,20 +99,6 @@ function Platform.OpenWithCallback(Title, Type, Callback)
 	else
 		return
 	end
-end
-
-function Platform.OpenFileDialog(Title)
-    local ReturnPathC = tinyfiledialog.tinyfd_openFileDialog(Title, nil, 2, nil, nil, 0) 
-
-	-- I love ffi so much, i love when it crashes on me with no error!
-	return (ReturnPathC ~= nil) and ffi.string(ReturnPathC)
-end
-
-function Platform.OpenFolderDialog(Title)
-    local ReturnPathC = tinyfiledialog.tinyfd_selectFolderDialog(Title, nil)
-
-	-- I love ffi so much, i love when it crashes on me with no error!
-	return (ReturnPathC ~= nil) and ffi.string(ReturnPathC)
 end
 
 -- bloctans is stupid he says

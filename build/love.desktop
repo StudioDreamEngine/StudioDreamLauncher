@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=StudioDreamLauncher
+Comment=The StudioDream Launcher
+MimeType=application/x-love-game;
+Exec=StudioDreamLauncher %f
+Type=Application
+Categories=Game;
+Terminal=false
+Icon=icon
+NoDisplay=true
