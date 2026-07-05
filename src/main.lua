@@ -1,3 +1,19 @@
+-- CLibraries
+local CurrentOS = love.system.getOS()
+
+local Extensions = {
+    Linux = "so",
+    Windows = "dll"
+}
+
+package.cpath = package.cpath..";./CLibraries/"..string.lower(CurrentOS).."/?."..Extensions[CurrentOS]
+
+-- Packages
+
+require('Packages.LuauPolyfill')
+NativeFS = require('Packages.nativefs')
+Platform = require('Packages.Platform')
+
 local content = {}
 local text = 'Loading'
 
@@ -8,6 +24,8 @@ function love.load()
     content.bar     = love.graphics.newImage("Assets/bar.png")
 
     love.window.setIcon(content.icon)
+    
+    Platform.Init("StudioDreamLauncher")
 end
 
 function love.update(dt)
