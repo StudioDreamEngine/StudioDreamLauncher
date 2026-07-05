@@ -11,9 +11,9 @@ package.cpath = package.cpath..";./CLibraries/"..string.lower(CurrentOS).."/?.".
 -- Packages
 
 require('Packages.LuauPolyfill')
-NativeFS = require('Packages.nativefs')
-Platform = require('Packages.Platform')
-HTTPS = require('https')
+NativeFS    = require('Packages.nativefs')
+Platform    = require('Packages.Platform')
+HTTPS       = require('https')
 
 local content = {}
 local text = 'Loading'
@@ -23,8 +23,10 @@ local needsDownload = false
 local latest = '0.6'
 local ext = '.AppImage'
 local file = 'StudioDream-'
+local execFile = 'StudioDream-Linux.AppImage'
 local os = 'Linux'
 local launch = true
+local extract = false
 local timer = 0
 
 
@@ -62,6 +64,7 @@ function love.load()
     
     ext = os == 'Windows' and '.zip' or '.AppImage'
     file = 'StudioDream-' .. love.system.getOS() .. ext
+    execFile = os == 'Windows' and 'StudioDream/StudioDream.exe' or 'StudioDream.AppImage'
 
     if not table.find(NativeFS.getDirectoryItems(Platform.GetDocuments()), os == 'Windows' and 'StudioDream' or 'StudioDream.AppImage') then
         print("needs download")
@@ -81,20 +84,12 @@ function love.update(dt)
     timer = timer - dt
 
     if needsDownload then text = 'Downloading...' end
+    if extract then text = 'Extracting...' end
     if launch then text = 'Launching...' end
 
-    if timer <= 0 and not launch and not needsDownload then
-<<<<<<< HEAD
+    if timer <= 0 and not launch and not needsDownload and not extract then
+        Platform.ExecuteAndReplace(Platform.GetDocuments() .. '/' .. execFile)
         love.event.quit()
-=======
-        
-        print("Exec and replace")
-        print(Platform.GetDocuments() .. '/StudioDream' .. ext)
-        Platform.ExecuteAndReplace(Platform.GetDocuments() .. '/StudioDream' .. ext)
-        --love.system.openURL(Platform.GetDocuments() .. '/StudioDream' .. ext)
-        --os.execute(Platform.GetDocuments() .. '/StudioDream' .. ext)
-        --love.event.quit()
->>>>>>> b34e40bb6aae4bed522acf9e9e9f8bcbdb848a66
     end
 
     if LETHIMDRAW then
@@ -104,8 +99,15 @@ function love.update(dt)
 
     if launch then
         launch = false
-        text = 'Launched'
         timer = 2
+    end
+
+    if extract then
+        extract = false
+        print('extracting')
+        --os.execute("powershell.exe -nologo -noprofile -command \"& { Add-Type -A 'System.IO.Compression.FileSystem'; [IO.Compression.ZipFile]::ExtractToDirectory('StudioDream-Windows.zip', 'StudioDream'); }\"")
+        text = 'Extracted'
+        launch = true
     end
 
     if needsDownload then
@@ -113,7 +115,9 @@ function love.update(dt)
         downloadFile("https://github.com/StudioDreamEngine/StudioDream/releases/download/" .. latest .. '/' .. file, Platform.GetDocuments() .. '/StudioDream' .. ext)
         NativeFS.write(Platform.GetDocuments() .. '/version', latest)
         text = 'Downloaded'
-        launch = true
+        if os == 'Windows' then
+            extract = true
+        else launch = true end
     end
 
 
