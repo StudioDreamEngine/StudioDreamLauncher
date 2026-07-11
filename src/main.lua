@@ -14,6 +14,7 @@ require('Packages.LuauPolyfill')
 NativeFS    = require('Packages.nativefs')
 Platform    = require('Packages.Platform')
 HTTPS       = require('https')
+JSON        = require('Packages.json')
 
 local content = {}
 local text = 'Loading'
@@ -30,10 +31,11 @@ local extract = false
 local timer = 0
 
 
-local function getData(from)
+local function getData(from, headers)
     print(from)
-    local code, body, header = HTTPS.request(from)
-    print(code, header)
+    local code, body, header = HTTPS.request(from, {headers=headers})
+    print("CODE", code)
+    print("HEADER", header)
     if not body then error(code) end
 
     return body
@@ -57,7 +59,9 @@ function love.load()
     
     Platform.Init("StudioDreamLauncher")
 
-    latest = getData('https://raw.githubusercontent.com/StudioDreamEngine/StudioDream/refs/heads/main/latest')
+    local body = getData('https://api.github.com/repos/StudioDreamEngine/StudioDream/releases/latest', {["User-Agent"]="StudioDreamLauncher"})
+    print("BODY", body)
+    latest = JSON.decode(body).name
     print(latest)
     
     os = love.system.getOS()
