@@ -3,10 +3,47 @@ local ffi = require('ffi')
 
 local C = ffi.C
 
+local win_exec
+
 if (love.system.getOS() == 'Windows') then
-	ffi.cdef([[
-		int _execv( const char *cmdname, const char *const *argv );
-	]])
+	-- Sorry and thank you https://github.com/NoxiousPluK/obs-call-webhook/blob/main/call_webhook.lua, I REALLY dont wanna touch ffi so i just had to steal this
+	ffi.cdef [[
+		typedef void* HANDLE;
+		typedef int    BOOL;
+		typedef struct {
+			unsigned long  cb;
+			char          *lpReserved, *lpDesktop, *lpTitle;
+			unsigned long  dwX, dwY, dwXSize, dwYSize;
+			unsigned long  dwXCountChars, dwYCountChars, dwFillAttribute, dwFlags;
+			unsigned short wShowWindow, cbReserved2;
+			unsigned char *lpReserved2;
+			HANDLE         hStdInput, hStdOutput, hStdError;
+		} STARTUPINFOA;
+		typedef struct {
+			HANDLE hProcess, hThread;
+			unsigned long dwProcessId, dwThreadId;
+		} PROCESS_INFORMATION;
+		BOOL CreateProcessA(
+			const char *lpApplicationName, char *lpCommandLine,
+			void *lpProcessAttributes, void *lpThreadAttributes,
+			BOOL bInheritHandles, unsigned long dwCreationFlags,
+			void *lpEnvironment, const char *lpCurrentDirectory,
+			STARTUPINFOA *lpStartupInfo, PROCESS_INFORMATION *lpProcessInformation
+		);
+		BOOL CloseHandle(HANDLE hObject);
+	]]
+	
+	win_exec = function(cmd)
+		local si = ffi.new("STARTUPINFOA")
+		si.cb = ffi.sizeof("STARTUPINFOA")
+		local pi = ffi.new("PROCESS_INFORMATION")
+		local buf = ffi.new("char[?]", #cmd + 1, cmd)
+		local ok = ffi.C.CreateProcessA(nil, buf, nil, nil, false, 0, nil, nil, si, pi)
+		if ok ~= 0 then
+			ffi.C.CloseHandle(pi.hProcess)
+			ffi.C.CloseHandle(pi.hThread)
+		end
+	end
 else
 	-- POSIX standard functions that should work on all OS'es (Android, Linux, MacOS, Windows) assuming microsoft decides to not be different for once
 	ffi.cdef([[
@@ -83,12 +120,10 @@ function Platform.ExecuteAndReplace(Path)
 	local a
 
 	if Platform.IsWindows then
-		a = C._execv(Path, nil)
+		win_exec(Path)
 	else
 		a = C.execv(Path, nil)
 	end
-
-	print(a)
 end
 
 return Platform
