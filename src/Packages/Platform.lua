@@ -2,6 +2,7 @@
 local ffi = require('ffi')
 
 local C = ffi.C
+local tinyfiledialog = ffi.load(package.searchpath("tinyfiledialogs64", package.cpath))
 
 ffi.cdef[[
     char * tinyfd_openFileDialog(
@@ -17,10 +18,16 @@ ffi.cdef[[
 	char const * const aDefaultPath ) ;
 ]]
 
--- POSIX standard functions that should work on all OS'es (Android, Linux, MacOS, Windows) assuming microsoft decides to not be different for once
-ffi.cdef([[
-    int execv(char const* path, const char* argv[]);
-]])
+if (love.system.getOS() == 'Windows') then
+	ffi.cdef([[
+		int _execv( const char *cmdname, const char *const *argv );
+	]])
+else
+	-- POSIX standard functions that should work on all OS'es (Android, Linux, MacOS, Windows) assuming microsoft decides to not be different for once
+	ffi.cdef([[
+		int execv(char const* path, const char* argv[]);
+	]])
+end
 
 local Platform = {}
 Platform.Identity = "Unnamed"
@@ -101,9 +108,30 @@ function Platform.OpenWithCallback(Title, Type, Callback)
 	end
 end
 
+function Platform.OpenFileDialog(Title)
+    local ReturnPathC = tinyfiledialog.tinyfd_openFileDialog(Title, nil, 2, nil, nil, 0) 
+
+	-- I love ffi so much, i love when it crashes on me with no error!
+	return (ReturnPathC ~= nil) and ffi.string(ReturnPathC)
+end
+
+function Platform.OpenFolderDialog(Title)
+    local ReturnPathC = tinyfiledialog.tinyfd_selectFolderDialog(Title, nil)
+
+	-- I love ffi so much, i love when it crashes on me with no error!
+	return (ReturnPathC ~= nil) and ffi.string(ReturnPathC)
+end
+
 -- bloctans is stupid he says
 function Platform.ExecuteAndReplace(Path)
-    local a = C.execv(Path, nil)
+	local a
+
+	if Platform.IsWindows then
+		a = C._execv(Path, nil)
+	else
+		a = C.execv(Path, nil)
+	end
+
 	print(a)
 end
 
