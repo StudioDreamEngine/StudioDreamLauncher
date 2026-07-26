@@ -1,13 +1,3 @@
--- CLibraries
-local CurrentOS = love.system.getOS()
-
-local Extensions = {
-    Linux = "so",
-    Windows = "dll"
-}
-
-package.cpath = package.cpath..";./CLibraries/"..string.lower(CurrentOS).."/?."..Extensions[CurrentOS]
-
 -- Packages
 
 require('Packages.LuauPolyfill')

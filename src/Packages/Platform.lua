@@ -2,21 +2,6 @@
 local ffi = require('ffi')
 
 local C = ffi.C
-local tinyfiledialog = ffi.load(package.searchpath("tinyfiledialogs64", package.cpath))
-
-ffi.cdef[[
-    char * tinyfd_openFileDialog(
-	char const * aTitle, /* NULL or "" */
-	char const * aDefaultPathAndOrFile, /* NULL or "" , ends with / to set only a directory */
-	int aNumOfFilterPatterns , /* 0 (2 in the following example) */
-	char const * const * aFilterPatterns, /* NULL or char const * lFilterPatterns[2]={"*.png","*.jpg"}; */
-	char const * aSingleFilterDescription, /* NULL or "image files" */
-	int aAllowMultipleSelects ) ;
-
-	char const * tinyfd_selectFolderDialog (
-	char const * const aTitle ,
-	char const * const aDefaultPath ) ;
-]]
 
 if (love.system.getOS() == 'Windows') then
 	ffi.cdef([[
@@ -91,35 +76,6 @@ function Platform.Execute(...)
 
 	local ArgsC = ffi.new("const char*["..(Args.n+1).."]", ArgsProcessed)
 	local a = C.execvp(ArgsC[0], ArgsC)]]
-end
-
---[[
-	Open a file or folder with a callback function
-
-	Returns Callback result and path if sucessful, otherwise nothing
-]]
-function Platform.OpenWithCallback(Title, Type, Callback)
-	local Path = Platform[Type](Title)
-
-	if Path then
-		return Callback(Path), Path
-	else
-		return
-	end
-end
-
-function Platform.OpenFileDialog(Title)
-    local ReturnPathC = tinyfiledialog.tinyfd_openFileDialog(Title, nil, 2, nil, nil, 0) 
-
-	-- I love ffi so much, i love when it crashes on me with no error!
-	return (ReturnPathC ~= nil) and ffi.string(ReturnPathC)
-end
-
-function Platform.OpenFolderDialog(Title)
-    local ReturnPathC = tinyfiledialog.tinyfd_selectFolderDialog(Title, nil)
-
-	-- I love ffi so much, i love when it crashes on me with no error!
-	return (ReturnPathC ~= nil) and ffi.string(ReturnPathC)
 end
 
 -- bloctans is stupid he says
