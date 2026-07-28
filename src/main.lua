@@ -5,7 +5,7 @@ NativeFS    = require('Packages.nativefs')
 Platform    = require('Packages.Platform')
 HTTPS       = require('https')
 JSON        = require('Packages.json')
-
+ZIP         = require("Packages.ExtractZip")
 local content = {}
 local text = 'Loading'
 
@@ -82,6 +82,9 @@ function love.update(dt)
     if launch then text = 'Launching...' end
 
     if timer <= 0 and not launch and not needsDownload and not extract then
+        --[[print(Platform.GetDocuments())
+        print(execFile)
+        print(Platform.GetDocuments() .. '/' .. execFile)]]
         Platform.ExecuteAndReplace(Platform.GetDocuments() .. '/' .. execFile)
         love.event.quit()
     end
@@ -99,6 +102,9 @@ function love.update(dt)
     if extract then
         extract = false
         print('extracting')
+        if os == "Windows" then
+            ZIP.extractZIP(Platform.GetDocuments() .. "/StudioDream.zip",Platform.GetDocuments(),true)
+        end
         --os.execute("powershell.exe -nologo -noprofile -command \"& { Add-Type -A 'System.IO.Compression.FileSystem'; [IO.Compression.ZipFile]::ExtractToDirectory('StudioDream-Windows.zip', 'StudioDream'); }\"")
         text = 'Extracted'
         launch = true
