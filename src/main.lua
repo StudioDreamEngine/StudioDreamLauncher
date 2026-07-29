@@ -133,5 +133,8 @@ function love.draw()
     love.graphics.draw(content.bar, 0, 440)
     --love.graphics.setColor(0, 0, 0, 1)
     love.graphics.setFont(content.roboto)
-    love.graphics.printf(text, 0, 475, 1920/2, "center")
+    love.graphics.printf(text, 0, 460, 1920/2, "right")
+
+    love.graphics.setFont(content.roboto)
+    love.graphics.printf("Created by: Dream Team", 0, 480, 1920/2, "left",0,0.5)
 end
