@@ -1,11 +1,14 @@
 -- Packages
-
+local ffi = require "ffi"
 require('Packages.LuauPolyfill')
+
 NativeFS    = require('Packages.nativefs')
 Platform    = require('Packages.Platform')
 HTTPS       = require('https')
 JSON        = require('Packages.json')
 ZIP         = require("Packages.ExtractZip")
+ShortcutMaker = require("Packages.ShortcutMaker")
+
 local content = {}
 local text = 'Loading'
 
@@ -18,6 +21,8 @@ local execFile = 'StudioDream-Linux.AppImage'
 local os = 'Linux'
 local launch = true
 local extract = false
+local path = false
+local ExePath = nil
 local timer = 0
 
 
@@ -72,6 +77,11 @@ function love.load()
             launch = false
         end
     end
+    if not table.find(NativeFS.getDirectoryItems(Platform.GetDesktop()), "Studio Dream.url") then
+        print("DIDNT FOUND THE SHORTCUT")
+        path = true
+        launch = false
+    end
 end
 
 function love.update(dt)
@@ -80,8 +90,9 @@ function love.update(dt)
     if needsDownload then text = 'Downloading...' end
     if extract then text = 'Extracting...' end
     if launch then text = 'Launching...' end
+    if path then text = 'Creating Path...' end
 
-    if timer <= 0 and not launch and not needsDownload and not extract then
+    if timer <= 0 and not launch and not needsDownload and not extract and not path then
         --[[print(Platform.GetDocuments())
         print(execFile)
         print(Platform.GetDocuments() .. '/' .. execFile)]]
@@ -103,11 +114,12 @@ function love.update(dt)
         extract = false
         print('extracting')
         if os == "Windows" then
+            
             ZIP.extractZIP(Platform.GetDocuments() .. "/StudioDream.zip",Platform.GetDocuments(),true)
         end
         --os.execute("powershell.exe -nologo -noprofile -command \"& { Add-Type -A 'System.IO.Compression.FileSystem'; [IO.Compression.ZipFile]::ExtractToDirectory('StudioDream-Windows.zip', 'StudioDream'); }\"")
         text = 'Extracted'
-        launch = true
+        path = true
     end
 
     if needsDownload then
@@ -117,9 +129,21 @@ function love.update(dt)
         text = 'Downloaded'
         if os == 'Windows' then
             extract = true
-        else launch = true end
+        else path = true end
     end
 
+    if path then
+        path = false
+        if not Platform.FileExist(Platform.GetDesktop() .. "Studio Dream Launcher.url") then
+            print("Creating path...")
+            ExePath = Platform.GetExecutablePath()--os == "Windows" and Platform.GetDocuments() .. "/StudioDream/StudioDream.exe" or Platform.GetDocuments() .. "/StudioDream.AppImage"
+            if not ExePath then
+                ExePath = os == "Windows" and Platform.GetDocuments() .. "/StudioDream/StudioDream.exe" or Platform.GetDocuments() .. "/StudioDream.AppImage"
+            end
+            ShortcutMaker.Create(ExePath,"Studio Dream Launcher")
+        end
+        launch = true
+    end
 
     LETHIMDRAW = true
 end
@@ -135,6 +159,6 @@ function love.draw()
     love.graphics.setFont(content.roboto)
     love.graphics.printf(text, 0, 460, 1920/2, "right")
 
-    love.graphics.setFont(content.roboto)
-    love.graphics.printf("Created by: Dream Team", 0, 480, 1920/2, "left",0,0.5)
+   --[[ love.graphics.setFont(content.roboto)
+    love.graphics.printf("Created by: Dream Team", 0, 480, 1920/2, "left",0,0.5)]]
 end

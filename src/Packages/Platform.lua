@@ -62,6 +62,22 @@ function Platform.GetDocuments()
 	return Platform.GetHome().."/Documents/"..Platform.Identity
 end
 
+function Platform.GetDesktop()
+	return Platform.GetHome().."/Desktop/"
+end
+
+function Platform.FileExist(directory)
+	return love.filesystem.getInfo(directory) and true or false
+end
+
+function Platform.GetExecutablePath()
+    if love.filesystem.isFused() then
+        return love.filesystem.getSource()
+    end
+
+    return nil
+end
+
 function Platform.ParsePath(Path)
 	local FullPath = NativeFS.getFullPath(Path)
     local LastChar = string.sub(FullPath, -1, -1)
