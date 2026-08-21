@@ -14,6 +14,7 @@ local text = 'Loading'
 
 local LETHIMDRAW = true
 local needsDownload = false
+local neededDown = false
 local latest = '0.6'
 local ext = '.AppImage'
 local file = 'StudioDream-'
@@ -124,6 +125,7 @@ function love.update(dt)
 
     if needsDownload then
         needsDownload = false
+        neededDown = true
         downloadFile("https://github.com/StudioDreamEngine/StudioDream/releases/download/" .. latest .. '/' .. file, Platform.GetDocuments() .. '/StudioDream' .. ext)
         NativeFS.write(Platform.GetDocuments() .. '/version', latest)
         text = 'Downloaded'
@@ -134,7 +136,7 @@ function love.update(dt)
 
     if path then
         path = false
-        if not Platform.FileExist(Platform.GetDesktop() .. "Studio Dream Launcher.url") then
+        if not Platform.FileExist(Platform.GetDesktop() .. "Studio Dream Launcher.url") or neededDown then
             print("Creating path...")
             ExePath = Platform.GetExecutablePath()--os == "Windows" and Platform.GetDocuments() .. "/StudioDream/StudioDream.exe" or Platform.GetDocuments() .. "/StudioDream.AppImage"
             if not ExePath then
