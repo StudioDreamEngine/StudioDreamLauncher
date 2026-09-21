@@ -1,0 +1,9 @@
+[submodule "src/Packages/nativefs"]
+	path = src/Packages/nativefs
+	url = https://github.com/StudioDreamEngine/nativefs.git
+[submodule "src/Packages/Platform"]
+	path = src/Packages/Platform
+	url = https://github.com/StudioDreamEngine/Platform.git
+[submodule "src/Packages/LuauPolyfill"]
+	path = src/Packages/LuauPolyfill
+	url = https://github.com/StudioDreamEngine/LuauPolyfill.git

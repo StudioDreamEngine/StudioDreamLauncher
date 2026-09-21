@@ -1,44 +1,31 @@
 local Extractor = {}
 local NativeFS = require("Packages.nativefs")
-local lfs = love.filesystem
 
 local function enu(folder, saveDir)
-    for _, v in ipairs(lfs.getDirectoryItems(folder)) do
+    for _, v in ipairs(love.filesystem.getDirectoryItems(folder)) do
         local src = folder .. "/" .. v
         local dst = saveDir .. "/" .. v
 
-        if lfs.getInfo(src, "directory") then
-            NativeFS.createDirectory(dst)
-            enu(src, dst)
-        else
-            local data = lfs.read(src)
-            NativeFS.write(dst, data)
-        end
+        --if love.filesystem.getInfo(src, "directory") then
+        --    NativeFS.createDirectory(dst)
+        --    enu(src, dst)
+        --else
+        local data = love.filesystem.read(src)
+        love.filesystem.write(dst, data)
+        --end
     end
 end
 
-function Extractor.extractZIP(file, dir, delete)
-    dir = dir or ""
+function Extractor.extractZIP(file, target)
+    love.filesystem.createDirectory(target)
 
-    if dir ~= "" then
-		print("DIR INST NIL")
-		dir = dir.."/StudioDream"
-        NativeFS.createDirectory(dir)
-    end
-
-    local temp = tostring(math.random(1000, 2000))
-    local success,err = lfs.mountFullPath(file, temp)
+    local success,err = love.filesystem.mount(file, "Zip")
 
     if success then
-        print("it worked")
-        enu(temp, dir)
-        lfs.unmountFullPath(file)
+        enu("Zip", target)
+        love.filesystem.unmount("Zip")
     else
         print("FAIL!!!! OPS!!")
-    end
-
-    if delete then
-        NativeFS.remove(file)
     end
 end
 
